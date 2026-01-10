@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Converter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+
+        .converter-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .tab-button {
+            padding: 15px 30px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            color: #999;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .tab-button.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-button:hover {
+            color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9ff;
+        }
+
+        .upload-area:hover {
+            background: #f0f2ff;
+            border-color: #764ba2;
+        }
+
+        .upload-area.dragover {
+            background: #f0f2ff;
+            border-color: #764ba2;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .upload-text {
+            color: #333;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .upload-subtext {
+            color: #999;
+            font-size: 0.95em;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-info {
+            display: none;
+            background: #f0f2ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .file-info.show {
+            display: block;
+        }
+
+        .file-name {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .file-size {
+            color: #666;
+            font-size: 0.95em;
+            margin-bottom: 15px;
+        }
+
+        .convert-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .convert-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .convert-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .progress-container {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .progress-container.show {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #eee;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .status-message {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .status-message.loading {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .status-message.success {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+
+        .status-message.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .download-btn {
+            display: none;
+            width: 100%;
+            padding: 15px;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .download-btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .download-btn.show {
+            display: block;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .converter-tabs {
+                flex-direction: column;
+            }
+
+            .upload-area {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 Media Converter</h1>
+        <p class="subtitle">Convert between video and audio formats</p>
+
+        <div class="converter-tabs">
+            <button class="tab-button active" onclick="switchTab('video-to-mp3')">
+                🎥 Video to MP3
+            </button>
+            <button class="tab-button" onclick="switchTab('audio-to-video')">
+                🎵 Audio to Video
+            </button>
+        </div>
+
+        <!-- Video to MP3 Tab -->
+        <div id="video-to-mp3" class="tab-content active">
+            <div class="upload-area" id="upload-area-video" onclick="document.getElementById('file-input-video').click()">
+                <div class="upload-icon">📹</div>
+                <div class="upload-text">Click to upload or drag and drop</div>
+                <div class="upload-subtext">MP4, AVI, MOV, or MKV files</div>
+                <input type="file" id="file-input-video" class="file-input" accept=".mp4,.avi,.mov,.mkv">
+            </div>
+
+            <div id="file-info-video" class="file-info">
+                <div class="file-name" id="file-name-video"></div>
+                <div class="file-size" id="file-size-video"></div>
+                <button class="convert-btn" onclick="convertVideoToMp3()" id="convert-btn-video">Convert to MP3</button>
+            </div>
+
+            <div id="progress-video" class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill-video"></div>
+                </div>
+                <div class="status-message loading" id="status-video">Converting... Please wait</div>
+            </div>
+
+            <a id="download-btn-video" class="download-btn" download>📥 Download MP3</a>
+        </div>
+
+        <!-- Audio to Video Tab -->
+        <div id="audio-to-video" class="tab-content">
+            <div class="upload-area" id="upload-area-audio" onclick="document.getElementById('file-input-audio').click()">
+                <div class="upload-icon">🎵</div>
+                <div class="upload-text">Click to upload or drag and drop</div>
+                <div class="upload-subtext">MP3, WAV, AAC, or M4A files</div>
+                <input type="file" id="file-input-audio" class="file-input" accept=".mp3,.wav,.aac,.m4a">
+            </div>
+
+            <div id="file-info-audio" class="file-info">
+                <div class="file-name" id="file-name-audio"></div>
+                <div class="file-size" id="file-size-audio"></div>
+                <button class="convert-btn" onclick="convertAudioToVideo()" id="convert-btn-audio">Convert to Video</button>
+            </div>
+
+            <div id="progress-audio" class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill-audio"></div>
+                </div>
+                <div class="status-message loading" id="status-audio">Converting... Please wait</div>
+            </div>
+
+            <a id="download-btn-audio" class="download-btn" download>📥 Download Video</a>
+        </div>
+    </div>
+
+    <script>
+        const fileInputVideo = document.getElementById('file-input-video');
+        const fileInputAudio = document.getElementById('file-input-audio');
+        const uploadAreaVideo = document.getElementById('upload-area-video');
+        const uploadAreaAudio = document.getElementById('upload-area-audio');
+
+        let selectedFileVideo = null;
+        let selectedFileAudio = null;
+
+        // Tab switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Video to MP3 - File handling
+        uploadAreaVideo.addEventListener('click', () => fileInputVideo.click());
+        uploadAreaVideo.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadAreaVideo.classList.add('dragover');
+        });
+        uploadAreaVideo.addEventListener('dragleave', () => uploadAreaVideo.classList.remove('dragover'));
+        uploadAreaVideo.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadAreaVideo.classList.remove('dragover');
+            handleFileSelectVideo(e.dataTransfer.files);
+        });
+
+        fileInputVideo.addEventListener('change', (e) => handleFileSelectVideo(e.target.files));
+
+        function handleFileSelectVideo(files) {
+            if (files.length > 0) {
+                selectedFileVideo = files[0];
+                updateFileInfoVideo();
+            }
+        }
+
+        function updateFileInfoVideo() {
+            if (selectedFileVideo) {
+                document.getElementById('file-name-video').textContent = `📄 ${selectedFileVideo.name}`;
+                document.getElementById('file-size-video').textContent = `Size: ${(selectedFileVideo.size / 1024 / 1024).toFixed(2)} MB`;
+                document.getElementById('file-info-video').classList.add('show');
+            }
+        }
+
+        // Audio to Video - File handling
+        uploadAreaAudio.addEventListener('click', () => fileInputAudio.click());
+        uploadAreaAudio.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadAreaAudio.classList.add('dragover');
+        });
+        uploadAreaAudio.addEventListener('dragleave', () => uploadAreaAudio.classList.remove('dragover'));
+        uploadAreaAudio.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadAreaAudio.classList.remove('dragover');
+            handleFileSelectAudio(e.dataTransfer.files);
+        });
+
+        fileInputAudio.addEventListener('change', (e) => handleFileSelectAudio(e.target.files));
+
+        function handleFileSelectAudio(files) {
+            if (files.length > 0) {
+                selectedFileAudio = files[0];
+                updateFileInfoAudio();
+            }
+        }
+
+        function updateFileInfoAudio() {
+            if (selectedFileAudio) {
+                document.getElementById('file-name-audio').textContent = `📄 ${selectedFileAudio.name}`;
+                document.getElementById('file-size-audio').textContent = `Size: ${(selectedFileAudio.size / 1024 / 1024).toFixed(2)} MB`;
+                document.getElementById('file-info-audio').classList.add('show');
+            }
+        }
+
+        // Conversion functions
+        async function convertVideoToMp3() {
+            if (!selectedFileVideo) return;
+
+            const formData = new FormData();
+            formData.append('file', selectedFileVideo);
+
+            const progressContainer = document.getElementById('progress-video');
+            const statusMessage = document.getElementById('status-video');
+            const downloadBtn = document.getElementById('download-btn-video');
+            const convertBtn = document.getElementById('convert-btn-video');
+
+            progressContainer.classList.add('show');
+            convertBtn.disabled = true;
+            statusMessage.textContent = 'Converting... Please wait (this may take a few minutes)';
+            statusMessage.className = 'status-message loading';
+            downloadBtn.classList.remove('show');
+
+            try {
+                const response = await fetch('/convert/video-to-mp3', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    statusMessage.textContent = '✅ Conversion complete!';
+                    statusMessage.className = 'status-message success';
+                    downloadBtn.href = data.url;
+                    downloadBtn.download = data.filename;
+                    downloadBtn.classList.add('show');
+                } else {
+                    statusMessage.textContent = `❌ Error: ${data.error}`;
+                    statusMessage.className = 'status-message error';
+                }
+            } catch (error) {
+                statusMessage.textContent = `❌ Error: ${error.message}`;
+                statusMessage.className = 'status-message error';
+            } finally {
+                convertBtn.disabled = false;
+            }
+        }
+
+        async function convertAudioToVideo() {
+            if (!selectedFileAudio) return;
+
+            const formData = new FormData();
+            formData.append('file', selectedFileAudio);
+
+            const progressContainer = document.getElementById('progress-audio');
+            const statusMessage = document.getElementById('status-audio');
+            const downloadBtn = document.getElementById('download-btn-audio');
+            const convertBtn = document.getElementById('convert-btn-audio');
+
+            progressContainer.classList.add('show');
+            convertBtn.disabled = true;
+            statusMessage.textContent = 'Converting... Please wait (this may take a few minutes)';
+            statusMessage.className = 'status-message loading';
+            downloadBtn.classList.remove('show');
+
+            try {
+                const response = await fetch('/convert/audio-to-video', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    statusMessage.textContent = '✅ Conversion complete!';
+                    statusMessage.className = 'status-message success';
+                    downloadBtn.href = data.url;
+                    downloadBtn.download = data.filename;
+                    downloadBtn.classList.add('show');
+                } else {
+                    statusMessage.textContent = `❌ Error: ${data.error}`;
+                    statusMessage.className = 'status-message error';
+                }
+            } catch (error) {
+                statusMessage.textContent = `❌ Error: ${error.message}`;
+                statusMessage.className = 'status-message error';
+            } finally {
+                convertBtn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
